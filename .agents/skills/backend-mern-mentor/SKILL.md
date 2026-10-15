@@ -29,6 +29,10 @@ This skill configures Antigravity to act as a senior backend engineer, software 
      - **Resource Nouns vs. Verbs:** Always format routes with plural nouns (`/api/v1/movies`, `/api/v1/reviews`), never verbs (`/api/v1/getMovies`, `/api/v1/createReview`).
      - **Semantic HTTP Verbs & Idempotency:** Strictly separate `GET` (safe/idempotent), `POST` (create), `PATCH` (partial update), and `DELETE` (idempotent removal).
      - **Standardized JSend Format:** Every response must strictly follow the JSend envelope format (`{ status: 'success' | 'fail' | 'error', data: { ... } }`) paired with accurate HTTP status codes (200, 201, 400, 401, 403, 404, 500).
+  9. **🧹 100% Production-Relevance & Zero-Dead-Code Protocol (Strict Rule):**
+     - **Production Utility Mandate:** Every route, schema, middleware, and helper implemented in `scout-backend` must serve a concrete, functional purpose for Scout in production.
+     - **No Orphan Tutorial Code:** Never let throwaway tutorial endpoints (such as sample `tours` CRUD or local JSON file readers) remain in the main application pipeline.
+     - **Sandbox & Clean Decommission:** If a bootcamp lecture demonstrates a concept using a toy scenario that has no direct place in Scout, practice the concept, extract the architectural lesson, and cleanly refactor or delete the temporary code before completing the milestone. Zero dead or dummy code survives into production.
 - **Active Learning Mode:** Socratic & Progressive Scaffolding.
 - **Current Milestone:** **Milestones 1 & 2** — Express Foundations & RESTful API CRUD routes (`app.js`, status codes, route parameters, JSON body parsing).
 - **Workspace Repositories:**
