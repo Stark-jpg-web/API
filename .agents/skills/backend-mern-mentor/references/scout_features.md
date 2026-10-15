@@ -14,7 +14,34 @@ This document provides the exhaustive backend specification for **Scout** (forme
 
 ---
 
-## 2. Comprehensive Feature Matrix
+## 2. Core RESTful Architecture & Stateless Principles
+
+The Scout backend is strictly architected upon Roy Fielding's REST constraints and modern production HTTP semantics:
+
+1. **Statelessness (Core Contract)**:
+   - **Zero Session Memory**: The server maintains no client session state in memory. Each incoming request must contain all data, credentials, and contextual parameters needed for execution.
+   - **Stateless Authentication**: Verified via signed JSON Web Tokens (JWT) transmitted in `httpOnly` secure cookies or `Authorization: Bearer <token>` headers. Token verification is cryptographic; no server session table lookups are performed.
+   - **Horizontal Clustering**: Zero state dependence allows effortless deployment across container clusters, PM2 worker processes, and serverless environments with zero session-sync bottlenecks.
+2. **Resource-Oriented Endpoint Hierarchy**:
+   - Resources are represented with plural nouns, never action verbs:
+     - Collection URLs: `/api/v1/movies`, `/api/v1/reviews`, `/api/v1/users`
+     - Document URLs: `/api/v1/movies/:id`, `/api/v1/reviews/:id`
+     - Sub-Resource URLs: `/api/v1/movies/:movieId/reviews`
+3. **HTTP Verb Semantics & Idempotency**:
+   - `GET`: Safe & idempotent resource retrieval.
+   - `POST`: Non-idempotent resource creation.
+   - `PATCH`: Idempotent partial resource modification.
+   - `DELETE`: Idempotent resource removal.
+4. **Standard JSend Response Format**:
+   - Success (`200 OK`, `201 Created`): `{ "status": "success", "data": { ... } }`
+   - Client Failures (`400`, `401`, `403`, `404`): `{ "status": "fail", "data": { ... } }`
+   - Server Errors (`500`): `{ "status": "error", "message": "..." }`
+5. **Layered System & Cache Control**:
+   - Read-heavy endpoints provide `Cache-Control` headers for reverse proxies, CDNs, and client caching layers.
+
+---
+
+## 3. Comprehensive Feature Matrix
 
 ### A. Authentication, Identity & User Profiles (Milestone 2.2 / Phase 2)
 1. **User Registration & Email Verification**:

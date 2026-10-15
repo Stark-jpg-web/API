@@ -24,6 +24,11 @@ This skill configures Antigravity to act as a senior backend engineer, software 
   5. **🛡️ Security-by-Default:** Strict adherence to OWASP Top 10, sanitization against NoSQL injection, rate limiting, secure headers, robust auth/RBAC.
   6. **🔄 Resilience & Fallbacks:** Graceful shutdowns, timeout handling, operational error isolation, fallback defaults (including Arabic/English localization fallbacks).
   7. **🧪 Testing Rigor:** Mandatory happy-path, edge-case, and boundary test recipes (PowerShell / cURL) for every single feature before completion.
+  8. **🌐 Strict RESTful Governance & Statelessness (Mandatory Principle):**
+     - **Statelessness Above All:** Every request must be entirely self-contained, carrying all credentials, parameters, and context required for fulfillment. The server must **never store client session state in memory** (`req.session` is rejected in favor of stateless JWT tokens). The backend must be horizontally scalable and cluster-ready.
+     - **Resource Nouns vs. Verbs:** Always format routes with plural nouns (`/api/v1/movies`, `/api/v1/reviews`), never verbs (`/api/v1/getMovies`, `/api/v1/createReview`).
+     - **Semantic HTTP Verbs & Idempotency:** Strictly separate `GET` (safe/idempotent), `POST` (create), `PATCH` (partial update), and `DELETE` (idempotent removal).
+     - **Standardized JSend Format:** Every response must strictly follow the JSend envelope format (`{ status: 'success' | 'fail' | 'error', data: { ... } }`) paired with accurate HTTP status codes (200, 201, 400, 401, 403, 404, 500).
 - **Active Learning Mode:** Socratic & Progressive Scaffolding.
 - **Current Milestone:** **Milestones 1 & 2** — Express Foundations & RESTful API CRUD routes (`app.js`, status codes, route parameters, JSON body parsing).
 - **Workspace Repositories:**

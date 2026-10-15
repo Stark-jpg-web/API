@@ -32,6 +32,50 @@ It powers the Scout ecosystem by acting as:
 
 ---
 
+## 🌐 Core RESTful API Principles & Architectural Governance
+
+The Scout API strictly adheres to the architectural constraints of Representational State Transfer (REST) to guarantee predictable behavior, infinite scalability, and clean client-server decoupling:
+
+### 1. 🔄 Statelessness (The Primary Architecture Pillar)
+* **Zero Server-Side Session State**: The server never stores client session state in memory between requests (no server-side memory sessions or session affinity requirements).
+* **Self-Contained Requests**: Every single incoming HTTP request must include all information, headers, query parameters, and credentials required to understand, authenticate, and fulfill it.
+* **Stateless JWT Authentication**: Authentication is handled statelessly via signed JSON Web Tokens (JWT) carried in `httpOnly` secure cookies or `Authorization: Bearer <token>` headers. The server verifies tokens cryptographically without stateful database session lookups.
+* **Horizontal Scalability**: Because the backend is 100% stateless, instances can be cloned across multiple containers, serverless clusters, and load balancers with zero session-sync bottlenecks.
+
+### 2. 🎯 Resource-Oriented Uniform Interface
+* **Resource Nouns (Never Verbs)**: API endpoints represent entities/resources using plural nouns:
+  * ✅ *Compliant*: `GET /api/v1/movies`, `POST /api/v1/reviews`, `DELETE /api/v1/library/favorites/550`
+  * ❌ *Non-Compliant*: `GET /api/v1/getMovies`, `POST /api/v1/createReview`, `POST /api/v1/deleteFavorite`
+* **Nested Sub-Resources**: Logical hierarchical relationships are represented cleanly:
+  * `GET /api/v1/movies/:movieId/reviews` (All reviews belonging to a specific movie)
+  * `POST /api/v1/movies/:movieId/reviews` (Create review under that specific movie)
+
+### 3. 🚦 Semantic HTTP Verbs & Idempotency
+* **`GET`**: Retrieve resources. Safe and idempotent (never mutates server data).
+* **`POST`**: Create new sub-resources. Non-idempotent.
+* **`PATCH`**: Partially update specific fields on an existing resource. Idempotent.
+* **`DELETE`**: Remove resources. Idempotent.
+
+### 4. 📦 Standardized JSend JSON Responses & HTTP Status Codes
+Every response envelope adheres to the **JSend specification** with accurate semantic HTTP status codes:
+* **`200 OK` / `201 Created` (Success)**:
+  ```json
+  { "status": "success", "data": { "movie": { "id": 550, "title": "Fight Club" } } }
+  ```
+* **`400 Bad Request` / `401 Unauthorized` / `404 Not Found` (Client Operational Failures)**:
+  ```json
+  { "status": "fail", "data": { "email": "Please provide a valid email address" } }
+  ```
+* **`500 Internal Server Error` (Server Exceptions)**:
+  ```json
+  { "status": "error", "message": "An unexpected server error occurred" }
+  ```
+
+### 5. ⚡ Cacheability & Layered Systems
+* Read-heavy public responses utilize HTTP `Cache-Control` and `ETag` headers to enable intermediary caching (browsers, CDNs, proxies) while reducing database loads.
+
+---
+
 ## 🏛 Architectural Taxonomy & Layer Responsibilities
 
 ```text
