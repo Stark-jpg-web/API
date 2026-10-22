@@ -5,9 +5,8 @@ const movieRouter = require('./routes/movieRoutes');
 const userRouter = require('./routes/userRoutes');
 
 const app = express();
-console.log(process.env);
-
 app.use(express.json());
+
 
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
