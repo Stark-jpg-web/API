@@ -1,22 +1,19 @@
 const express = require('express');
-const moviesController = require('../controllers/movieController');
+const movieController = require('../controllers/movieController');
 
 const router = express.Router();
 
-router.param('id', (req, res, next, val) => {
-  console.log('The ID is:', val);
-  next();
-});
+router.param('id', movieController.checkId);
 
 router
   .route('/')
-  .get(moviesController.getAllMovies)
-  .post(moviesController.createMovie);
+  .get(movieController.getAllMovies)
+  .post(movieController.checkBody, movieController.createMovie);
 
 router
   .route('/:id')
-  .get(moviesController.getMovie)
-  .delete(moviesController.deleteMovie)
-  .patch(moviesController.updateMovie);
+  .get(movieController.getMovie)
+  .delete(movieController.deleteMovie)
+  .patch(movieController.updateMovie);
 
 module.exports = router;

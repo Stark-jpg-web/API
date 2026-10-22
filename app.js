@@ -1,7 +1,7 @@
 const express = require('express');
 const morgan = require('morgan');
 
-const movieRouter = require('./routes/movieRoutes');
+const movieRouter = require('./Routes/movieRoutes');
 const userRouter = require('./routes/userRoutes');
 
 const app = express();

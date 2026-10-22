@@ -4,31 +4,50 @@ const movies = JSON.parse(
   fs.readFileSync(`${__dirname}/../dev-data/data/movies-simple.json`),
 );
 
-exports.getAllMovies = (req, res) => {
-  res.status(200).json({
-    status: 'success',
-    results: movies.length,
-    data: {
-      movies,
-    },
-  });
-};
-
-exports.getMovie = (req, res) => {
-  const id = Number(req.params.id);
+exports.checkId = (req, res, next, val) => {
+  const id = Number(val);
+  const movieIndex = movies.findIndex((el) => el.id === id);
+  console.log(`movieIndex :`, movieIndex);
+  console.log('The ID is:', id);
   const movie = movies.find((el) => el.id === id);
-
+  req.movie = movie;
   if (!movie) {
     return res.status(404).json({
       status: 'fail',
       message: 'Movie not found with that ID',
     });
   }
+  req.movie = movies[movieIndex];
+  req.movieIndex = movieIndex;
+  next();
+};
 
+exports.checkBody = (req, res, next) => {
+  console.log(req.body);
+  if (!req.body.title || !req.body.releaseYear) {
+    return res.status(400).json({
+      status: 'fail',
+      message: 'Missing name or release_date',
+    });
+  }
+  next();
+};
+
+exports.getAllMovies = (req, res) => {
+  res.status(200).json({
+    status: 'success',
+    results: movies.length,
+    data: {
+      movies: movies,
+    },
+  });
+};
+
+exports.getMovie = (req, res) => {
   res.status(200).json({
     status: 'success',
     data: {
-      movie,
+      movie: req.movie,
     },
   });
 };
@@ -60,35 +79,16 @@ exports.createMovie = (req, res) => {
   );
 };
 exports.updateMovie = (req, res) => {
-  const id = Number(req.params.id);
-  const movie = movies.find((el) => el.id === id);
-  if (!movie) {
-    return res.status(404).json({
-      status: 'fail',
-      message: 'Movie not found with that ID',
-    });
-  }
   res.status(200).json({
     status: 'success',
     data: {
-      movie: { ...movie, ...req.body },
+      movie: { ...req.movie, ...req.body },
     },
   });
 };
 
 exports.deleteMovie = (req, res) => {
-  const id = Number(req.params.id);
-  const movieIndex = movies.findIndex((el) => el.id === id);
-
-  if (movieIndex === -1) {
-    return res.status(404).json({
-      status: 'fail',
-      message: 'Movie not found with that ID',
-    });
-  }
-
-  movies.splice(movieIndex, 1);
-
+  movies.splice(req.movieIndex, 1);
   fs.writeFile(
     `${__dirname}/../dev-data/data/movies-simple.json`,
     JSON.stringify(movies),
