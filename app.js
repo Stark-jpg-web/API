@@ -1,15 +1,18 @@
 const express = require('express');
 const morgan = require('morgan');
 
-const movieRouter = require('./Routes/movieRoutes');
+const movieRouter = require('./routes/movieRoutes');
 const userRouter = require('./routes/userRoutes');
 
 const app = express();
+console.log(process.env);
 
 app.use(express.json());
+
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 }
+app.use(express.static(`${__dirname}/public`));
 
 //movie router
 app.use('/api/v1/movies', movieRouter);

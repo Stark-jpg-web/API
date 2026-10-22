@@ -6,7 +6,10 @@ npm-debug.log*
 # Environment variables
 .env
 .env.*
+config.env
+*.env
 !.env.example
+!config.env.example
 
 # Dependencies (for future packages)
 node_modules/
