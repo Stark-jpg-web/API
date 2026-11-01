@@ -1,105 +1,88 @@
-const fs = require('fs');
+const Media = require('../models/mediaModel');
 
-const movies = JSON.parse(
-  fs.readFileSync(`${__dirname}/../dev-data/data/movies-simple.json`),
-);
-
-exports.checkId = (req, res, next, val) => {
-  const id = Number(val);
-  const movieIndex = movies.findIndex((el) => el.id === id);
-  req.movie = movie;
-  if (!movie) {
-    return res.status(404).json({
-      status: 'fail',
-      message: 'Movie not found with that ID',
+exports.getAllMedia = async (req, res) => {
+  try {
+    const media = await Media.find();
+    res.status(200).json({
+      status: 'success',
+      results: media.length,
+      data: {
+        media: media,
+      },
+    });
+  } catch (err) {
+    res.status(400).json({
+      status: 'Fail',
+      message: `Bad Request : ${err}`,
     });
   }
-  req.movie = movies[movieIndex];
-  req.movieIndex = movieIndex;
-  next();
 };
 
-exports.checkBody = (req, res, next) => {
-  console.log(req.body);
-  if (!req.body.title || !req.body.releaseYear) {
-    return res.status(400).json({
-      status: 'fail',
-      message: 'Missing Title or release_date',
+exports.getMedia = async (req, res) => {
+  try {
+    const media = await Media.findById(req.params.id);
+
+    res.status(200).json({
+      status: 'success',
+      data: {
+        media: media,
+        message: 'Movie Found',
+      },
+    });
+  } catch (err) {
+    res.status(400).json({
+      status: 'Fail',
+      message: `Bad Request : ${err}`,
     });
   }
-  next();
 };
 
-exports.getAllMovies = (req, res) => {
-  res.status(200).json({
-    status: 'success',
-    results: movies.length,
-    data: {
-      movies: movies,
-    },
-  });
+exports.createMedia = async (req, res) => {
+  try {
+    const newMedia = await Media.create(req.body);
+    res.status(200).json({
+      status: 'success',
+      data: {
+        media: newMedia,
+        message: 'media created successfully',
+      },
+    });
+  } catch (err) {
+    res.status(400).json({
+      status: 'Fail',
+      message: `Bad Request : ${err}`,
+    });
+  }
 };
 
-exports.getMovie = (req, res) => {
-  res.status(200).json({
-    status: 'success',
-    data: {
-      movie: req.movie,
-    },
-  });
+exports.updateMedia = async (req, res) => {
+  try {
+    const media = await Media.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+      runValidators: true,
+    });
+    res.status(200).json({
+      status: 'success',
+      data: {
+        media: media,
+      },
+    });
+  } catch (err) {
+    res.status(400).json({
+      status: 'Fail',
+      message: `Bad Request : ${err}`,
+    });
+  }
 };
 
-exports.createMovie = (req, res) => {
-  const newId = movies.length > 0 ? movies[movies.length - 1].id + 1 : 0;
-  const newMovie = { id: newId, ...req.body };
-
-  movies.push(newMovie);
-
-  fs.writeFile(
-    `${__dirname}/../dev-data/data/movies-simple.json`,
-    JSON.stringify(movies),
-    (err) => {
-      if (err) {
-        return res.status(500).json({
-          status: 'error',
-          message: 'Failed to persist movie data',
-        });
-      }
-
-      res.status(201).json({
-        status: 'success',
-        data: {
-          movie: newMovie,
-        },
-      });
-    },
-  );
-};
-exports.updateMovie = (req, res) => {
-  res.status(200).json({
-    status: 'success',
-    data: {
-      movie: { ...req.movie, ...req.body },
-    },
-  });
-};
-
-exports.deleteMovie = (req, res) => {
-  movies.splice(req.movieIndex, 1);
-  fs.writeFile(
-    `${__dirname}/../dev-data/data/movies-simple.json`,
-    JSON.stringify(movies),
-    (err) => {
-      if (err) {
-        return res.status(500).json({
-          status: 'error',
-          message: 'Failed to persist movie data',
-        });
-      }
-      res.status(204).json({
-        status: 'success',
-        data: null,
-      });
-    },
-  );
+exports.deleteMedia = async (req, res) => {
+  try {
+    await Media.findByIdAndDelete(req.params.id);
+    res.status(204).json({ status: null });
+  } catch (err) {
+    res.status(400).json({
+      status: 'Fail',
+      message: `Bad Request : ${err}`,
+    });
+  }
 };
