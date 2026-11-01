@@ -200,6 +200,47 @@ All endpoints return responses complying with the **JSend specification**:
 | `PATCH`  | `/api/v1/reviews/:id`             | Update an existing review     | Author / Admin |
 | `DELETE` | `/api/v1/reviews/:id`             | Delete an existing review     | Author / Admin |
 
+### 🤖 AI Conversational Assistant & Proxy
+
+| Method | Endpoint           | Description                                                        | Access |
+| :----- | :----------------- | :----------------------------------------------------------------- | :----- |
+| `POST` | `/api/v1/ai/chat`  | Secure proxy forwarding user prompts to Google AI Studio (Gemini) | Public / Rate-Limited |
+
+#### `POST /api/v1/ai/chat` Specification
+
+* **Request Body**:
+  ```json
+  {
+    "message": "Recommend me 3 mind-bending sci-fi movies like Interstellar",
+    "history": [
+      { "role": "user", "content": "Hello" },
+      { "role": "assistant", "content": "Hi! I am Scout AI..." }
+    ],
+    "language": "en"
+  }
+  ```
+* **Success Response (`200 OK`)**:
+  ```json
+  {
+    "status": "success",
+    "data": {
+      "reply": "Here are 3 mind-bending sci-fi movies you'll love:\n1. **Arrival (2016)**...",
+      "provider": "google-gemini",
+      "model": "gemini-2.5-flash"
+    }
+  }
+  ```
+* **Security & Injections Hardening**:
+  - **Prompt Injection Defense**: System instructions enforced on server; user prompt isolated inside delimiter boundaries (`"""`).
+  - **Indirect Injection Shield for RAG**: Retrieved user documents and reviews are sanitized and wrapped in `<retrieved_context>` blocks with explicit instructions for the LLM to treat them strictly as passive data.
+  - **Payload Size Guards**: Hard cutoff at 1,000 characters per prompt and maximum 8 history messages to prevent context exhaustion.
+  - **Rate Limiting**: Strictly capped at 20 chat requests per 15 minutes per IP via `express-rate-limit`.
+  - **Zero Key Leakage**: `GEMINI_API_KEY` stays on the server; client never touches Google AI Studio credentials.
+
+#### 🧠 Hybrid RAG (Retrieval-Augmented Generation) Architecture
+* **Server-Side Retrieval**: When authenticated, the backend queries MongoDB Atlas collections (`reviews`, `movies`, `libraries`) for matching genres, high ratings, and recent community discussions.
+* **Grounding Pipeline**: Combines user library vectors/keywords with real TMDB movie metadata before dispatching to Google AI Studio, guaranteeing zero hallucinated movie titles or fictitious release years.
+
 ---
 
 ## 🛡️ Security & Performance Standards
@@ -257,6 +298,10 @@ JWT_COOKIE_EXPIRES_IN=90
 # TMDB External Integration
 TMDB_API_KEY=your_tmdb_api_key
 TMDB_ACCESS_TOKEN=your_v4_bearer_access_token
+
+# Google AI Studio / Gemini Integration
+GEMINI_API_KEY=your_google_ai_studio_api_key_here
+GEMINI_MODEL=gemini-2.5-flash
 ```
 
 ### 4. Running the Server

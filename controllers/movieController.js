@@ -7,9 +7,6 @@ const movies = JSON.parse(
 exports.checkId = (req, res, next, val) => {
   const id = Number(val);
   const movieIndex = movies.findIndex((el) => el.id === id);
-  console.log(`movieIndex :`, movieIndex);
-  console.log('The ID is:', id);
-  const movie = movies.find((el) => el.id === id);
   req.movie = movie;
   if (!movie) {
     return res.status(404).json({
@@ -27,7 +24,7 @@ exports.checkBody = (req, res, next) => {
   if (!req.body.title || !req.body.releaseYear) {
     return res.status(400).json({
       status: 'fail',
-      message: 'Missing name or release_date',
+      message: 'Missing Title or release_date',
     });
   }
   next();
